@@ -25,7 +25,15 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add a password'],
         minlength: 6,
+        required: function() {
+            return !this.googleId; // If googleId is not present, password is required
+        },
         select: false
+    },
+    googleId: {
+        type: String, // Google ID is used for OAuth
+        unique: true,
+        sparse: true
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
@@ -37,6 +45,14 @@ const UserSchema = new mongoose.Schema({
 
 // Encrypt password using bcrypt
 UserSchema.pre('save', async function(next) {
+    // ✅ ป้องกันการ hash password ซ้ำหากไม่มีการเปลี่ยนแปลง
+    if (!this.isModified("password")) {
+        return next();
+    }
+
+    if (!this.password) {
+        return next(new Error("Password is missing")); // ✅ ป้องกัน undefined
+    }
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });

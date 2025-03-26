@@ -1,5 +1,5 @@
 const User = require('../models/User');
-
+const passport = require('passport');
 // @desc    Register user
 // @route   POST /api/v1/auth/register
 // @access  Public
@@ -72,13 +72,17 @@ const sendTokenResponse = (user, statusCode, res) => {
         options.secure = true;
     }
 
-    res
-        .status(statusCode)
-        .cookie('token', token, options)
-        .json({
-            success: true,
-            token
-        });
+    res.status(statusCode)
+    // .cookie('token', token, options)
+    .json({
+        success: true,
+        //add for frontend
+        _id:user._id,
+        name: user.name,
+        email:user.email,
+        //end for frontend
+        token
+    });
 }
 
 // @desc    Get current logged in user
@@ -88,3 +92,23 @@ exports.getMe = async (req, res, next) => {
     const user = await User.findById(req.user.id);
     res.status(200).json({ success: true, data: user });
 }
+
+// @desc    Redirect to Google Login
+// @route   GET /api/v1/auth/google
+exports.googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+// @desc    Handle Google OAuth Callback
+// @route   GET /api/v1/auth/google/callback
+exports.googleCallback = passport.authenticate('google', { failureRedirect: '/' });
+
+// @desc    Send token after successful login
+exports.googleSuccess = (req, res) => {
+    sendTokenResponse(req.user, 200, res);
+};
+
+// @desc    Logout user
+// @route   GET /api/v1/auth/logout
+exports.logout = (req, res) => {
+    res.clearCookie('token');
+    res.json({ success: true, message: 'Logged out successfully' });
+};
