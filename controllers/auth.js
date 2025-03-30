@@ -99,8 +99,19 @@ exports.googleLogin = passport.authenticate('google', { scope: ['profile', 'emai
 
 // @desc    Handle Google OAuth Callback
 // @route   GET /api/v1/auth/google/callback
-exports.googleCallback = passport.authenticate('google', { failureRedirect: '/' });
+exports.googleCallback = (req, res, next) => {
+    passport.authenticate('google', { failureRedirect: '/' }, (err, user) => {
+        if (err || !user) {
+            return res.redirect('/');
+        }
 
+        // สร้าง token
+        const token = user.getSignedJwtToken();
+
+        // Redirect ไปยัง frontend พร้อม token และข้อมูล user
+        res.redirect(`http://localhost:5173?token=${token}&id=${user._id}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`);
+    })(req, res, next);
+};
 // @desc    Send token after successful login
 exports.googleSuccess = (req, res) => {
     sendTokenResponse(req.user, 200, res);
