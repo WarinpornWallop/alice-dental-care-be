@@ -5,15 +5,17 @@ const passport = require('passport');
 // @access  Public
 exports.register = async (req, res, next) => {
     try {
-        const { name, email, password, role } = req.body;
-
+        const { name, email, password, phone, role } = req.body;
+        console.log(req.body);
         // Create user
         const user = await User.create({
             name,
             email,
             password,
+            phone,
             role
         });
+       
 
         //Create token
         // const token = user.getSignedJwtToken();
@@ -80,6 +82,8 @@ const sendTokenResponse = (user, statusCode, res) => {
         _id:user._id,
         name: user.name,
         email:user.email,
+        phone:user.phone,
+        role:user.role,
         //end for frontend
         token
     });
