@@ -94,6 +94,28 @@ exports.getMe = async (req, res, next) => {
     res.status(200).json({ success: true, data: user });
 }
 
+// @desc    Edit current logged in user
+// @route   PUT /api/v1/auth/me
+// @access  Private
+exports.editMe = async (req, res, next) => {
+    //allow user to update only name and telNumber
+    const fieldsToUpdate = {
+        name: req.body.name,
+        telNumber: req.body.telNumber
+    };
+    try {
+        const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+            new: true,
+            runValidators: true
+        });
+
+        res.status(200).json({ success: true, data: user });
+    }
+    catch (err) {
+        res.status(400).json({ success: false });
+    }
+}
+
 // @desc    Redirect to Google Login
 // @route   GET /api/v1/auth/google
 exports.googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
