@@ -7,7 +7,7 @@ const {
   deleteDentist,
 } = require("../controllers/dentists");
 const { protect, authorize } = require("../middleware/auth");
-// const bookingRouter = require("./bookings"); //Include other resource routers //TODO:
+const bookingRouter = require("./bookings"); //Include other resource routers
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router
   .get(getDentist)
   .put(protect, authorize("admin"), updateDentist)
   .delete(protect, authorize("admin"), deleteDentist);
-// router.use("/:dentistId/bookings", bookingRouter); //Re-route into other resource routers //TODO:
+router.use("/:dentistId/bookings", bookingRouter); //Re-route into other resource routers
 
 //Export the router
 module.exports = router;
