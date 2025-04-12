@@ -1,7 +1,9 @@
 const Dentist = require("../models/Dentist");
+const Booking = require("../models/Booking");
+const { mapExpertiseCodesToObjectIds } = require("../services/expertise");
 
 //@desc     Get all dentists
-//@route    GET /api/v1/dentists
+//@route    GET /api/v1/dentistsอ
 //@access   Public
 exports.getDentists = async (req, res, next) => {
   let query;
@@ -22,7 +24,7 @@ exports.getDentists = async (req, res, next) => {
     (match) => `$${match}`
   );
   query = Dentist.find(JSON.parse(queryStr)).populate({
-    // path: "expertises", //TODO: populate expertise
+    path: "expertises",
   });
 
   //Select Fields
@@ -99,8 +101,26 @@ exports.getDentist = async (req, res, next) => {
 //@route    POST /api/v1/dentists
 //@access   Private
 exports.createDentist = async (req, res, next) => {
-  const dentist = await Dentist.create(req.body);
-  res.status(201).json({ success: true, data: dentist });
+  try {
+    // Map expertise codes to ObjectIds
+    const expertises = await mapExpertiseCodesToObjectIds(req.body.expertises);
+
+    // Create the dentist with the mapped expertises
+    let dentist = await Dentist.create({
+      ...req.body,
+      expertises,
+    });
+
+    // // Populate the expertises field
+    // dentist = await Dentist.findById(dentist._id).populate("expertises"); //⚠️ Not necessary
+
+    res.status(201).json({
+      success: true,
+      data: dentist,
+    });
+  } catch (err) {
+    return res.status(400).json({ success: false });
+  }
 };
 
 //@desc     Update single dentist
@@ -134,7 +154,7 @@ exports.deleteDentist = async (req, res, next) => {
       });
     }
 
-    // await Booking.deleteMany({ dentist: req.params.id }); //TODO: delete all bookings for this dentist
+    await Booking.deleteMany({ dentist: req.params.id });
     await Dentist.deleteOne({ _id: req.params.id });
 
     res.status(200).json({ success: true, data: {} });
