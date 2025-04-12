@@ -15,8 +15,7 @@ const DentistSchema = new mongoose.Schema({
   },
   expertises: [
     {
-      type: mongoose.Schema.ObjectId,
-      ref: "Expertise",
+      type: String,
       required: [true, "Please add expertise"],
     },
   ],

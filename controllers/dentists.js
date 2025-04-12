@@ -1,6 +1,6 @@
 const Dentist = require("../models/Dentist");
 const Booking = require("../models/Booking");
-const { mapExpertiseCodesToObjectIds } = require("../services/expertise");
+const { verifyExpertises } = require("../service/expertise");
 
 //@desc     Get all dentists
 //@route    GET /api/v1/dentistsอ
@@ -24,7 +24,7 @@ exports.getDentists = async (req, res, next) => {
     (match) => `$${match}`
   );
   query = Dentist.find(JSON.parse(queryStr)).populate({
-    path: "expertises",
+    // path: "bookings",
   });
 
   //Select Fields
@@ -102,24 +102,11 @@ exports.getDentist = async (req, res, next) => {
 //@access   Private
 exports.createDentist = async (req, res, next) => {
   try {
-    // Map expertise codes to ObjectIds
-    const expertises = await mapExpertiseCodesToObjectIds(req.body.expertises);
-
-    // Create the dentist with the mapped expertises
-    let dentist = await Dentist.create({
-      ...req.body,
-      expertises,
-    });
-
-    // // Populate the expertises field
-    // dentist = await Dentist.findById(dentist._id).populate("expertises"); //⚠️ Not necessary
-
-    res.status(201).json({
-      success: true,
-      data: dentist,
-    });
+    verifyExpertises(req.body.expertises);
+    const dentist = await Dentist.create(req.body);
+    res.status(201).json({ success: true, data: dentist });
   } catch (err) {
-    return res.status(400).json({ success: false });
+    res.status(400).json({ success: false });
   }
 };
 
@@ -128,6 +115,7 @@ exports.createDentist = async (req, res, next) => {
 //@access   Private
 exports.updateDentist = async (req, res, next) => {
   try {
+    verifyExpertises(req.body.expertises);
     const dentist = await Dentist.findByIdAndUpdate(req.params.id, req.body, {
       new: true, //return the new data
       runValidators: true, //run the validators in the model schema

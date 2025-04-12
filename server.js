@@ -5,7 +5,6 @@ const connectDB = require('./config/db');
 const passport = require('passport');
 const session = require("express-session");
 const cors = require('cors');
-const { seedExpertises } = require("./seedData");
 
 
 
@@ -18,9 +17,6 @@ dotenv.config({ path: "./config/config.env" });
 
 //Connect to database
 connectDB();
-
-//Seed data
-seedExpertises();
 
 require('./config/passport');
 
