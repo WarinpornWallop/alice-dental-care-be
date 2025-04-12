@@ -5,6 +5,10 @@ const ExpertiseSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please add a name"],
   },
+  code: {
+    type: String,
+    required: [true, "Please add a code"],
+  },
   description: {
     type: String,
     required: [true, "Please add a description"],

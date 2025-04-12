@@ -13,11 +13,13 @@ const DentistSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Please add year of experience"],
   },
-  expertise: {
-    type: [mongoose.Schema.ObjectId],
-    ref: "Expertise",
-    required: [true, "Please add expertise"],
-  },
+  expertises: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Expertise",
+      required: [true, "Please add expertise"],
+    },
+  ],
   profileImage: {
     type: String,
     default: "no-photo.jpg",
@@ -26,6 +28,13 @@ const DentistSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+DentistSchema.virtual("bookings", {
+  ref: "Booking",
+  localField: "_id",
+  foreignField: "dentist",
+  justOne: false,
 });
 
 module.exports = mongoose.model("Dentist", DentistSchema);
