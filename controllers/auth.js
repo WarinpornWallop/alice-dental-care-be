@@ -5,13 +5,14 @@ const passport = require('passport');
 // @access  Public
 exports.register = async (req, res, next) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password, telNumber, role } = req.body;
 
         // Create user
         const user = await User.create({
             name,
             email,
             password,
+            telNumber,
             role
         });
 
