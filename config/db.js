@@ -6,7 +6,12 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
+
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+
+    await mongoose.connection.db
+      .collection("resetpasswordtokens")
+      .createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 });
   } catch (error) {
     console.error(`Error: ${error.message}`);
     process.exit(1);

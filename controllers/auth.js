@@ -1,5 +1,10 @@
-const User = require('../models/User');
+const crypto = require('crypto');
 const passport = require('passport');
+
+const User = require('../models/User');
+const ResetPasswordToken = require('../models/ResetPasswordToken');
+const { sendEmail } = require('../service/email');
+
 // @desc    Register user
 // @route   POST /api/v1/auth/register
 // @access  Public
@@ -135,3 +140,32 @@ exports.logout = (req, res) => {
     res.clearCookie('token');
     res.json({ success: true, message: 'Logged out successfully' });
 };
+
+// @desc    Request password reset
+// @route   POST /api/v1/auth/request-reset-password
+// @access  Public
+exports.requestResetPassword = async (req, res, next) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ success: false, msg: 'Please provide email' });
+    }
+    
+    try {
+        const user = await User.findOne({ email });
+        
+        if (!user) {
+            return res.status(404).json({ success: false, msg: 'User not found' });
+        }
+
+        const resetToken = await ResetPasswordToken.create({ user: user._id, token: crypto.randomBytes(32).toString('hex') });
+        const resetLink = `${process.env.RESET_PASSWORD_URL}/${resetToken.token}`;
+        const emailBody = `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`;
+
+        await sendEmail(user.email, 'Password Reset', emailBody);
+
+        res.status(200).json({ success: true, msg: 'Reset password link sent to your email' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+    }
+}
