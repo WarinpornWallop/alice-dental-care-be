@@ -3,7 +3,7 @@ const passport = require('passport');
 
 const User = require('../models/User');
 const ResetPasswordToken = require('../models/ResetPasswordToken');
-const { sendEmail } = require('../service/email');
+const { sendEmail, getResetPasswordEmailBody } = require('../service/email');
 
 // @desc    Register user
 // @route   POST /api/v1/auth/register
@@ -158,10 +158,8 @@ exports.requestResetPassword = async (req, res, next) => {
         }
 
         const resetToken = await ResetPasswordToken.create({ user: user._id, token: crypto.randomBytes(32).toString('hex') });
-        const resetLink = `${process.env.RESET_PASSWORD_URL}/${resetToken.token}`;
-        const emailBody = `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`;
-
-        await sendEmail(user.email, 'Password Reset', emailBody);
+        const emailBody = getResetPasswordEmailBody(resetToken.token);
+        await sendEmail(user.email, 'Your Password Reset Link from Alice Dental Care', emailBody);
 
         res.status(200).json({ success: true, msg: 'Reset password link sent to your email' });
     } catch (err) {
