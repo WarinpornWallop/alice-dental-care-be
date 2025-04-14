@@ -10,6 +10,8 @@ const cors = require('cors');
 
 //Route files
 const test = require("./routes/test");
+const dentist = require("./routes/dentists");
+const booking = require("./routes/bookings");
 
 //Load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -48,6 +50,8 @@ app.use(passport.session());
 //Mount routers
 app.use("/api/v1/test", test);
 app.use('/api/v1/auth', auth);
+app.use("/api/v1/dentists", dentist);
+app.use("/api/v1/bookings", booking);
 
 const PORT = process.env.PORT || 5003;
 const server = app.listen(
