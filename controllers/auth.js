@@ -169,3 +169,35 @@ exports.requestResetPassword = async (req, res, next) => {
         res.status(500).json({ success: false });
     }
 }
+
+// @desc    Reset password
+// @route   POST /api/v1/auth/reset-password/:token
+// @access  Public
+exports.resetPassword = async (req, res, next) => {
+    const { password } = req.body;
+    const { token } = req.params;
+
+    if (!password) {
+        return res.status(400).json({ success: false, msg: 'Please provide new password' });
+    }
+
+    try {
+        const resetToken = await ResetPasswordToken.findOne({ token });
+
+        if (!resetToken) {
+            return res.status(400).json({ success: false, msg: 'Invalid or expired token' });
+        }
+
+        const user = await User.findById(resetToken.user);
+
+        user.password = password;
+        await user.save();
+
+        await ResetPasswordToken.deleteOne({ _id: resetToken._id });
+
+        res.status(200).json({ success: true, msg: 'Password reset successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+    }
+}
