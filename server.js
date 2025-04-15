@@ -5,8 +5,11 @@ const connectDB = require('./config/db');
 const passport = require('passport');
 const session = require("express-session");
 const cors = require('cors');
-
-
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const {xss} = require('express-xss-sanitizer');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
 
 //Route files
 const test = require("./routes/test");
@@ -33,6 +36,24 @@ app.use(cors());
 //Body parser
 app.use(express.json());
 
+//Sanitize data
+app.use(mongoSanitize());
+
+//Set security headers
+app.use(helmet());
+
+//Prevent XSS attacks
+app.use(xss());
+
+//Rate limiting
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 100
+});
+app.use(limiter);
+
+//Prevent http param pollution
+app.use(hpp());
 
 // Cookie parser
 app.use(cookieParser());
