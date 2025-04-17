@@ -12,7 +12,7 @@ const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
 
 //Route files
-const test = require("./routes/test");
+const auth = require('./routes/auth');
 const dentist = require("./routes/dentists");
 const booking = require("./routes/bookings");
 
@@ -24,9 +24,6 @@ connectDB();
 
 require('./config/passport');
 
-//Route files
-
-const auth = require('./routes/auth');
 
 //Initialize express
 const app = express();
@@ -69,7 +66,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //Mount routers
-app.use("/api/v1/test", test);
 app.use('/api/v1/auth', auth);
 app.use("/api/v1/dentists", dentist);
 app.use("/api/v1/bookings", booking);

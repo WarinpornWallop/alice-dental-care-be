@@ -26,8 +26,13 @@ exports.register = async (req, res, next) => {
     // res.status(200).json({ success: true, token });
     sendTokenResponse(user, 200, res);
   } catch (err) {
-    res.status(400).json({ success: false });
-    console.log(err.stack);
+    if (err.name === "ValidationError") {
+      const messages = Object.values(err.errors).map((val) => val.message);
+      return res.status(400).json({ success: false, msg: messages });
+    }
+
+    console.error(err.stack);
+    res.status(500).json({ success: false, msg: "Server Error" });
   }
 };
 
@@ -38,7 +43,7 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
+    console.log(email, password);
     // Validate email & password
     if (!email || !password) {
       return res

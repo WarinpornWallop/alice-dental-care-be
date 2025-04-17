@@ -3,7 +3,7 @@ const Booking = require("../models/Booking");
 const { verifyExpertises } = require("../service/expertise");
 
 //@desc     Get all dentists
-//@route    GET /api/v1/dentistsอ
+//@route    GET /api/v1/dentists
 //@access   Public
 exports.getDentists = async (req, res, next) => {
   let query;
@@ -24,7 +24,7 @@ exports.getDentists = async (req, res, next) => {
     (match) => `$${match}`
   );
   query = Dentist.find(JSON.parse(queryStr)).populate({
-    // path: "bookings",
+      path: "bookings",
   });
 
   //Select Fields
