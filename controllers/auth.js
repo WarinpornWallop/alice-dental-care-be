@@ -186,9 +186,10 @@ exports.requestResetPassword = async (req, res, next) => {
       token: crypto.randomBytes(32).toString("hex"),
     });
     const emailBody = getResetPasswordEmailBody(resetToken.token);
+    const emailTitle = "Your Password Reset Link from Alice Dental Care";
     await sendEmail(
       user.email,
-      "Your Password Reset Link from Alice Dental Care",
+      emailTitle,
       emailBody
     );
 
