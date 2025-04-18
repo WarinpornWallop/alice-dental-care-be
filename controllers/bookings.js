@@ -11,7 +11,7 @@ exports.getBookings = async (req, res, next) => {
   if (req.user.role !== "admin") {
     query = Booking.find({ user: req.user.id }).populate({
       path: "dentist",
-      select: "name gender expertises",
+      select: "name gender yearOfExp expertises",
     });
   } else {
     if (req.params.dentistId) {
@@ -24,7 +24,7 @@ exports.getBookings = async (req, res, next) => {
     } else {
       query = Booking.find().populate({
         path: "dentist",
-        select: "name gender expertises",
+        select: "name gender yearOfExp expertises",
       });
     }
   }
@@ -49,13 +49,21 @@ exports.getBooking = async (req, res, next) => {
   try {
     const booking = await Booking.findById(req.params.id).populate({
       path: "dentist",
-      select: "name gender expertises",
+      select: "name gender yearOfExp expertises",
     });
 
     if (!booking) {
       return res.status(404).json({
         success: false,
         message: `No booking with the ID of ${req.params.id}`,
+      });
+    }
+
+    //Make sure user is the owner of the booking
+    if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: `User ${req.user.id} is not authorized to get this booking`,
       });
     }
 

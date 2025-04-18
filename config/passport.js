@@ -14,17 +14,16 @@ passport.use(new GoogleStrategy({
             throw new Error("Google login failed: Missing profile ID or email");
         }
 
-        let user = await User.findOne({ googleId: profile.id });
-
+        const user = await User.findOne({ googleId: profile.id });
         if (!user) {
-            user = await User.create({
-                googleId: profile.id,
-                name: profile.displayName || "No Name",
-                email: profile.emails[0].value
-            });
+          const newUser = await User.create({
+            googleId: profile.id,
+            name: profile.displayName,
+            email: profile.emails[0].value,
+          });
+          return done(null, newUser);
         }
-
-        return done(null, user);
+        done(null, user);
     } catch (err) {
         return done(err, null);
     }

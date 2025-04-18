@@ -22,8 +22,6 @@ exports.register = async (req, res, next) => {
     });
 
     //Create token
-    // const token = user.getSignedJwtToken();
-    // res.status(200).json({ success: true, token });
     sendTokenResponse(user, 200, res);
   } catch (err) {
     if (err.name === "ValidationError") {
@@ -138,22 +136,27 @@ exports.editMe = async (req, res, next) => {
     res.status(400).json({ success: false });
   }
 };
-
-// @desc    Redirect to Google Login
+// @desc    Google OAuth login  
 // @route   GET /api/v1/auth/google
 exports.googleLogin = passport.authenticate("google", {
   scope: ["profile", "email"],
 });
 
-// @desc    Handle Google OAuth Callback
-// @route   GET /api/v1/auth/google/callback
-exports.googleCallback = passport.authenticate("google", {
-  failureRedirect: "/",
-});
 
-// @desc    Send token after successful login
-exports.googleSuccess = (req, res) => {
-  sendTokenResponse(req.user, 200, res);
+// @desc    Handle Google OAuth callback
+// @route   GET /api/v1/auth/google/callback
+exports.googleCallback = (req, res, next) => {
+  passport.authenticate("google", { failureRedirect: "/login" }, (err, user) => {
+    if (err || !user) {
+      return res.redirect("http://localhost:5173/login?error=authentication_failed");
+    }
+
+    // สร้าง JWT Token
+    const token = user.getSignedJwtToken(); // สมมติว่ามีฟังก์ชันนี้ใน model User
+
+    // Redirect ไปยัง frontend พร้อมข้อมูล
+    res.redirect(`http://localhost:5173/googlecallback?token=${token}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`);
+  })(req, res, next);
 };
 
 // @desc    Logout user
