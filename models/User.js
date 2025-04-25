@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
     },
     telNumber: {
         type: String,
-        required: [true, 'Please add phone number'],
+        required: [false, 'Please add phone number'],
         match: [
             /^0[0-9]{9}$/,
             'Please add valid phone number'
